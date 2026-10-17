@@ -1,15 +1,29 @@
 {
+  "id": "/Bitacora-residencia/",
   "name": "Bitácora de residencia",
   "short_name": "Bitácora",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/Bitacora-residencia/",
+  "scope": "/Bitacora-residencia/",
   "display": "standalone",
-  "background_color": "#F3F5F4",
-  "theme_color": "#1F4E5F",
+  "background_color": "#F6F3F8",
+  "theme_color": "#33275A",
   "lang": "es-UY",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
