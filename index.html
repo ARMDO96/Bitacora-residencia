@@ -242,7 +242,7 @@ const ESPECIALES={"2026-10-01":[{h:"08:30–13:30",a:"Jornada de uro-oncología 
 const VIERNES=["Viernes de papers","Poli dermato","Poli ORL","Sin actividad"];
 const POLIS=["Poli mama – Nantes","Poli general – Ximenez","UOC","Poli mama – Sandra","Poli general – Oviedo","Poli QT-general – Ximenez","Poli general – Melisa","Poli uro – Vera","Poli dermato","Poli ORL"];
 // Actividades donde puedo marcar "presenté yo"; entran como variable en la estadística
-const PRESENTABLES=["Ateneo INCA","Ateneo HC","Clase clínica HC"];
+const PRESENTABLES=["Ateneo INCA","Clase clínica HC"];
 const ESTADOS=["Cumplida","No asistí","Suspendida","Licencia"];
 const TIPOS=["Preparar poli","Control de pacientes","Ateneo","Resultados / llamadas","Gestión (FNR, recetas, formularios)","Interconsulta","Revisión bibliográfica","Docencia","Otro"];
 const FERIADOS={"2026-10-12":"Día de la Diversidad Cultural","2026-10-20":"Día del Funcionario de Salud Pública","2026-11-02":"Día de los Difuntos","2026-12-25":"Navidad","2027-01-01":"Año Nuevo","2027-01-04":"Reyes (trasladado)","2027-02-08":"Carnaval","2027-02-09":"Carnaval","2027-03-22":"Turismo","2027-03-23":"Turismo","2027-03-24":"Turismo","2027-03-25":"Turismo","2027-03-26":"Turismo"};
@@ -433,12 +433,12 @@ function viewResumen(){
    <div class="grid2">
     <div class="metric"><span class="lbl">Pacientes vistos</span><b>${st.pac}</b></div>
     <div class="metric ok"><span class="lbl">Asistencia</span><b>${st.asist===null?"—":st.asist.toFixed(1)+"%"}</b><span class="sub">${st.ok} cumplidas · ${st.no} no</span></div>
-    <div class="metric clay"><span class="lbl">Presentaciones</span><b>${st.presN}</b><span class="sub">en ${st.asistAt} ateneos y clases asistidos</span></div>
+    <div class="metric clay"><span class="lbl">Presentaciones</span><b>${st.presN}</b><span class="sub">de ${st.asistAt} entre Ateneo INCA y Clase clínica</span></div>
     <div class="metric indigo"><span class="lbl">Observaciones</span><b>${st.obs.length}</b><span class="sub">registros con nota</span></div>
     <div class="metric ochre"><span class="lbl">Tareas cumplidas</span><b>${st.hechas}/${st.ts.length}</b></div>
     <div class="metric off"><span class="lbl">Tareas vencidas</span><b>${st.venc}</b></div>
    </div>
-   <div class="sec"><h2>Ateneos y clases</h2></div>
+   <div class="sec"><h2>Ateneo INCA y Clase clínica</h2></div>
    <div class="tablewrap"><table><thead><tr><th>Actividad</th><th>Asistidos</th><th>Presenté</th><th>%</th></tr></thead><tbody>
     ${PRESENTABLES.map(a=>{const x=st.atn[a];return `<tr><td>${esc(a)}</td><td>${x.asist}</td><td>${x.pres}</td><td>${x.asist?Math.round(x.pres/x.asist*100)+"%":"·"}</td></tr>`}).join("")}
     <tr class="total"><td>Total</td><td>${st.asistAt}</td><td>${st.presN}</td><td>${st.asistAt?Math.round(st.presN/st.asistAt*100)+"%":"·"}</td></tr></tbody></table></div>
@@ -537,9 +537,9 @@ async function exportar(){
   const rs=[["Bitácora de residencia — "+nombreMes(mes)],["Generado",xd(hoyIso())],[],
     ["Indicador","Valor"],["Pacientes vistos",st.pac],["Actividades cumplidas",st.ok],["No asistidas / suspendidas",st.no],["Feriados / licencia",st.lic],
     ["% asistencia (excluye feriados y licencias)",st.asist===null?"":st.asist/100],
-    ["Presentaciones (ateneos y clases)",st.presN],["Ateneos y clases asistidos",st.asistAt],["Observaciones escritas",st.obs.length],
+    ["Presentaciones (Ateneo INCA y Clase clínica)",st.presN],["Ateneo INCA y Clase clínica asistidos",st.asistAt],["Observaciones escritas",st.obs.length],
     ["Tareas registradas",st.ts.length],["Tareas cumplidas",st.hechas],["Tareas pendientes",st.pend],["Tareas vencidas",st.venc],[],
-    ["Ateneos y clases","Asistidos","Presenté","% presenté"]];
+    ["Presentaciones","Asistidos","Presenté","% presenté"]];
   PRESENTABLES.forEach(a=>{const x=st.atn[a];rs.push([a,x.asist,x.pres,x.asist?x.pres/x.asist:""])});
   rs.push(["Total",st.asistAt,st.presN,st.asistAt?st.presN/st.asistAt:""],[]);
   rs.push(["Pacientes por policlínica",...st.cols.map(i=>MESN[MESES[i][1]-1]+" "+MESES[i][0]),...(st.cols.length>1?["Total"]:[])]);
@@ -557,7 +557,7 @@ async function exportar(){
   const w0=XLSX.utils.aoa_to_sheet(rs,{cellDates:true,dateNF:"dd/mm/yyyy"});w0["!cols"]=[{wch:42},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10}];
   const fmtPct=(ref)=>{if(w0[ref]&&typeof w0[ref].v==="number")w0[ref].z="0.0%"};
   fmtPct("B9");
-  const filaAt=rs.findIndex(r=>r[0]==="Ateneos y clases")+1;
+  const filaAt=rs.findIndex(r=>r[0]==="Presentaciones")+1;
   for(let i=1;i<=PRESENTABLES.length+1;i++)fmtPct("D"+(filaAt+i));
   const w1=XLSX.utils.aoa_to_sheet(regs,{cellDates:true,dateNF:"dd/mm/yyyy"});w1["!cols"]=[{wch:11},{wch:10},{wch:13},{wch:28},{wch:11},{wch:9},{wch:9},{wch:30},{wch:50},{wch:24}];
   const w3=XLSX.utils.aoa_to_sheet(ob,{cellDates:true,dateNF:"dd/mm/yyyy"});w3["!cols"]=[{wch:11},{wch:10},{wch:13},{wch:28},{wch:80}];
