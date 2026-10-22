@@ -227,7 +227,7 @@ const AGENDA={
  1:[{h:"09:00–11:00",a:"Poli mama – Sandra"},{h:"13:30–16:00",a:"Poli general – Oviedo"}],
  2:[{h:"08:30–09:30",a:"Ateneo HC"},{h:"09:30–11:00",a:"Clase clínica HC"},{h:"12:30–15:00",a:"Poli QT-general – Ximenez"}],
  3:[{h:"08:30–09:00",a:"Ateneo INCA"},{h:"09:00–13:00",a:"Poli general – Melisa"}],
- 4:[{h:"08:00–13:00",a:"Poli uro – Vera"}],
+ 4:[{h:"08:00–13:00",a:"Poli uro-digestivo Vera"}],
  5:[{h:"08:30–10:00",a:"Pautado HC"},{h:"Variable",a:"Viernes variable",v:true}]
 };
 const AGENDA_OCT={
@@ -238,11 +238,12 @@ const AGENDA_OCT={
  5:[{h:"08:30–10:00",a:"Pautado HC"},{h:"Variable",a:"Viernes variable",v:true}]
 };
 const CORTE="2026-10-16";
+const UMI={h:"",a:"UMI"};
 const ESPECIALES={"2026-10-01":[{h:"08:30–13:30",a:"Jornada de uro-oncología HC"}]};
 const VIERNES=["Viernes de papers","Poli dermato","Poli ORL","Sin actividad"];
-const POLIS=["Poli mama – Nantes","Poli general – Ximenez","UOC","Poli mama – Sandra","Poli general – Oviedo","Poli QT-general – Ximenez","Poli general – Melisa","Poli uro – Vera","Poli dermato","Poli ORL"];
+const POLIS=["Poli mama – Nantes","Poli general – Ximenez","UOC","Poli mama – Sandra","Poli general – Oviedo","Poli QT-general – Ximenez","Poli general – Melisa","Poli uro-digestivo Vera","Poli dermato","Poli ORL"];
 // Actividades donde puedo marcar "presenté yo"; entran como variable en la estadística
-const PRESENTABLES=["Ateneo INCA","Clase clínica HC"];
+const PRESENTABLES=["Ateneo INCA","Clase clínica HC","UMI"];
 const ESTADOS=["Cumplida","No asistí","Suspendida","Licencia"];
 const TIPOS=["Preparar poli","Control de pacientes","Ateneo","Resultados / llamadas","Gestión (FNR, recetas, formularios)","Interconsulta","Revisión bibliográfica","Docencia","Otro"];
 const FERIADOS={"2026-10-12":"Día de la Diversidad Cultural","2026-10-20":"Día del Funcionario de Salud Pública","2026-11-02":"Día de los Difuntos","2026-12-25":"Navidad","2027-01-01":"Año Nuevo","2027-01-04":"Reyes (trasladado)","2027-02-08":"Carnaval","2027-02-09":"Carnaval","2027-03-22":"Turismo","2027-03-23":"Turismo","2027-03-24":"Turismo","2027-03-25":"Turismo","2027-03-26":"Turismo"};
@@ -265,7 +266,7 @@ function diaInicial(){let s=hoyIso();if(s<INICIO)s=INICIO;if(s>FIN)s=FIN;const d
 state.dia=diaInicial();
 {const m=hoyIso().slice(0,7);if(MESES.some(([y,mm])=>m===y+"-"+pad(mm)))state.mes=m;}
 
-function slots(s){const wd=fromIso(s).getDay();const ag=ESPECIALES[s]||((s<=CORTE?AGENDA_OCT:AGENDA)[wd])||[];return ag.map((x,k)=>({...x,k,id:"r_"+s+"_"+k}))}
+function slots(s){const wd=fromIso(s).getDay();let ag=ESPECIALES[s]||((s<=CORTE?AGENDA_OCT:AGENDA)[wd])||[];if(wd===4)ag=[...ag,UMI];return ag.map((x,k)=>({...x,k,id:"r_"+s+"_"+k}))}
 function reg(s,slot){
   const d=docs.get(slot.id)||{};
   const def=enLicencia(s)?"Licencia":(FERIADOS[s]?"Feriado":"");
@@ -324,7 +325,7 @@ function restaurar(file){
 
 let tt;function toast(m){const el=document.getElementById("toast");el.textContent=m;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2600)}
 
-function cat(a){a=a||"";if(a.startsWith("Poli")||a==="UOC")return["poli","Policlínica"];if(/^(Ateneo|Clase)/.test(a))return["acad","Ateneo y docencia"];if(/Pautado|papers/i.test(a))return["lect","Pautas y lectura"];if(/Jornada/.test(a))return["evento","Jornada"];return["otro","Actividad"]}
+function cat(a){a=a||"";if(a.startsWith("Poli")||a==="UOC")return["poli","Policlínica"];if(/^(Ateneo|Clase|UMI)/.test(a))return["acad","Ateneo y docencia"];if(/Pautado|papers/i.test(a))return["lect","Pautas y lectura"];if(/Jornada/.test(a))return["evento","Jornada"];return["otro","Actividad"]}
 const ICO_STAR='<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>';
 const ICO_CHECK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
@@ -351,7 +352,7 @@ function viewHoy(){
     const [ck,cl]=cat(sl.v?r.act:sl.a);
     h+=`<section class="card ${cls}" data-cat="${ck}" aria-label="${esc(sl.v?"Actividad del viernes":sl.a)}">
       <div class="body">
-      <div><div class="kind"><span class="cat">${cl}</span>${r.estado==="Feriado"?'<span class="tag off">Feriado</span>':''}<span class="time">${sl.h}</span></div><h3>${esc(sl.v?(r.act||"Viernes sin definir"):sl.a)}</h3></div>`;
+      <div><div class="kind"><span class="cat">${cl}</span>${r.estado==="Feriado"?'<span class="tag off">Feriado</span>':''}${sl.h?`<span class="time">${sl.h}</span>`:''}</div><h3>${esc(sl.v?(r.act||"Viernes sin definir"):sl.a)}</h3></div>`;
     if(sl.v) h+=`<select class="field" id="vari-${sl.id}" data-vari="${sl.id}" aria-label="Actividad del viernes"><option value="">Elegí la actividad</option>${VIERNES.map(o=>`<option ${o===r.vari?"selected":""}>${o}</option>`).join("")}</select>`;
     h+=`<div class="seg4" role="group" aria-label="Estado">${ESTADOS.map(e=>`<button class="chip" data-est="${sl.id}" data-v="${e}" aria-pressed="${r.estado===e}">${e}</button>`).join("")}</div>`;
     if(PRESENTABLES.includes(r.act)){
@@ -433,12 +434,12 @@ function viewResumen(){
    <div class="grid2">
     <div class="metric"><span class="lbl">Pacientes vistos</span><b>${st.pac}</b></div>
     <div class="metric ok"><span class="lbl">Asistencia</span><b>${st.asist===null?"—":st.asist.toFixed(1)+"%"}</b><span class="sub">${st.ok} cumplidas · ${st.no} no</span></div>
-    <div class="metric clay"><span class="lbl">Presentaciones</span><b>${st.presN}</b><span class="sub">de ${st.asistAt} entre Ateneo INCA y Clase clínica</span></div>
+    <div class="metric clay"><span class="lbl">Presentaciones</span><b>${st.presN}</b><span class="sub">de ${st.asistAt} actividades asistidas</span></div>
     <div class="metric indigo"><span class="lbl">Observaciones</span><b>${st.obs.length}</b><span class="sub">registros con nota</span></div>
     <div class="metric ochre"><span class="lbl">Tareas cumplidas</span><b>${st.hechas}/${st.ts.length}</b></div>
     <div class="metric off"><span class="lbl">Tareas vencidas</span><b>${st.venc}</b></div>
    </div>
-   <div class="sec"><h2>Ateneo INCA y Clase clínica</h2></div>
+   <div class="sec"><h2>Presentaciones</h2></div>
    <div class="tablewrap"><table><thead><tr><th>Actividad</th><th>Asistidos</th><th>Presenté</th><th>%</th></tr></thead><tbody>
     ${PRESENTABLES.map(a=>{const x=st.atn[a];return `<tr><td>${esc(a)}</td><td>${x.asist}</td><td>${x.pres}</td><td>${x.asist?Math.round(x.pres/x.asist*100)+"%":"·"}</td></tr>`}).join("")}
     <tr class="total"><td>Total</td><td>${st.asistAt}</td><td>${st.presN}</td><td>${st.asistAt?Math.round(st.presN/st.asistAt*100)+"%":"·"}</td></tr></tbody></table></div>
@@ -537,7 +538,7 @@ async function exportar(){
   const rs=[["Bitácora de residencia — "+nombreMes(mes)],["Generado",xd(hoyIso())],[],
     ["Indicador","Valor"],["Pacientes vistos",st.pac],["Actividades cumplidas",st.ok],["No asistidas / suspendidas",st.no],["Feriados / licencia",st.lic],
     ["% asistencia (excluye feriados y licencias)",st.asist===null?"":st.asist/100],
-    ["Presentaciones (Ateneo INCA y Clase clínica)",st.presN],["Ateneo INCA y Clase clínica asistidos",st.asistAt],["Observaciones escritas",st.obs.length],
+    ["Presentaciones (Ateneo INCA, Clase clínica y UMI)",st.presN],["Actividades asistidas (Ateneo INCA, Clase clínica y UMI)",st.asistAt],["Observaciones escritas",st.obs.length],
     ["Tareas registradas",st.ts.length],["Tareas cumplidas",st.hechas],["Tareas pendientes",st.pend],["Tareas vencidas",st.venc],[],
     ["Presentaciones","Asistidos","Presenté","% presenté"]];
   PRESENTABLES.forEach(a=>{const x=st.atn[a];rs.push([a,x.asist,x.pres,x.asist?x.pres/x.asist:""])});
